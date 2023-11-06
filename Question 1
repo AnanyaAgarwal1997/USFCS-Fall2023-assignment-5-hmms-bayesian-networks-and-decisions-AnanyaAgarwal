@@ -1,0 +1,75 @@
+(10 points) Which route should we pick? Show your work.
+Speed(sandy) = 3km/h
+Speed(smooth) = 5 km/h
+Speed(rocky) = 2 km/h
+--> Route1=
+       P(sandy) = 0.2
+       P(smooth) = 0.3
+       P(rocky) = 0.5
+       Time(route 1) = 0.2*2/3 + 0.3*2/5 + 0.5*2/2 = 0.133 + 0.12 + 0.5 = 0.75  h
+
+--> Route2=
+       P(sandy) = 0.4
+       P(smooth) = 0.2
+       P(rocky) = 0.4
+       Time(route 2) = 0.4*1.8/3 + 0.2*1.8/5 + 0.4*1.8/2 = 0.24 + 0.072 + 0.36 = 0.672 h
+
+--> Route3=
+       P(sandy) = 0.5
+       P(smooth) = 0.4
+       P(rocky) = 0.1
+       Time(route 2) = 0.5*3.1/3 + 0.4*3.1/5 + 0.1*3.1/2 = 0.52 + 0.248 + 0.155 = 0.923 h
+
+       We should pick route 2.
+
+
+
+P(damagedCrater) = 0.3 will add 0.75 h
+P(!damagedCrater)=0.7
+
+Time(route 1) = 0.3*(0.75+0.75) + 0.7*0.75 = 0.45 + 0.525  = 0.975
+
+Time(route 2) = 0.6*(0.672 + 1) + 0.4*0.672 = 1.003 + 0.269 = 1.272
+
+We would chose route 1.
+
+
+Given: Route 3 is smooth
+time(route 3) = 3.1/5 = 0.62
+
+Yes, this information is helpful and we can say that route 3 is fastest.
+
+how long are we willing to wait for this information from the satellite?
+--> 0.975 -  0.62 = 0.355h
+
+
+(5 points) Now put this problem into ChatGPT. Is it able to solve it correctly? If not, where does it make mistakes?
+--> for chat GPT - 3.5 version, Choice of route is correct but values are wrong.
+
+From Chat GPT:
+Let's dive into these calculations!
+
+**Question 1:**
+Route 1: \(0.2 \times 3 + 0.3 \times 5 + 0.5 \times 2 = 0.6 + 1.5 + 1 = 3.1 \text{ km/h}\)
+Route 2: \(0.4 \times 3 + 0.2 \times 5 + 0.4 \times 2 = 1.2 + 1 + 0.8 = 3 \text{ km/h}\)
+Route 3: \(0.5 \times 3 + 0.4 \times 5 + 0.1 \times 2 = 1.5 + 2 + 0.2 = 3.7 \text{ km/h}\)
+So, Route 2 is the fastest without additional information.
+
+**Additional Information:**
+Route 1 with the damaged wall: \(3.1 \text{ km/h} + 0.3 \times 45 \text{ min} = 3.1 + 0.15 = 3.25 \text{ km/h}\)
+Route 2 with the damaged bridge: \(3 \text{ km/h} + 0.6 \times 1 \text{ hour} = 3 + 0.6 = 3.6 \text{ km/h}\)
+Route 3 with potential satellite information: \(3.7 \text{ km/h}\)
+So, now Route 1 becomes the fastest with the damaged wall.
+
+**Satellite Information:**
+
+Knowing the terrain in Route 3 would be helpful because it might save time if it's smooth. The value of this information
+depends on how much time you're willing to wait. If waiting for the satellite information takes less time than the
+potential time saved on Route 3, it's worth waiting.
+
+**Putting it into ChatGPT:**
+
+ChatGPT might struggle with this problem due to its text-based nature and the need for numerical calculations. It could
+handle the logic and decision-making aspects if guided properly, but for the quantitative calculations, it might not
+perform as accurately as a dedicated calculator or programming environment. You'd need to carefully structure the input
+to get meaningful responses from ChatGPT.
