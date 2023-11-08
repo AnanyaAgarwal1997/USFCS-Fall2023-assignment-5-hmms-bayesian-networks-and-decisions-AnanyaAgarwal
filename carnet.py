@@ -66,6 +66,48 @@ car_model.add_cpds( cpd_starts, cpd_ignition, cpd_gas, cpd_radio, cpd_battery, c
 
 car_infer = VariableElimination(car_model)
 
-print(car_infer.query(variables=["Moves"],evidence={"Radio":"turns on", "Starts":"yes"}))
+print("\n Given that the car will not move, what is the probability that the battery is not working?")
+print(car_infer.query(variables=["Battery"],evidence={"Moves": "no"}))
 
+print("\n Given that the radio is not working, what is the probability that the car will not start?")
+print(car_infer.query(variables=["Starts"],evidence={"Radio": "Doesn't turn on"}))
 
+print("\n Given that the battery is working, does the probability of the radio working change if we discover that the car has gas in it?")
+print(car_infer.query(variables=["Radio"],evidence={"Battery": "Works", "Gas": "Full"}))
+
+print("\n Given that the car doesn't move, how does the probability of the ignition failing change if we observe that the car dies not have gas in it?")
+print(car_infer.query(variables=["Ignition"],evidence={"Moves": "no", "Gas": "Empty"}))
+
+print("\n What is the probability that the car starts if the radio works and it has gas in it? ")
+print(car_infer.query(variables=["Starts"],evidence={"Radio": "turns on", "Gas": "Full"}))
+
+car_model_with_Key = BayesianNetwork(
+    [
+        ("Battery", "Radio"),
+        ("Battery", "Ignition"),
+        ("KeyPresent", "Starts"),
+        ("Ignition", "Starts"),
+        ("Gas", "Starts"),
+        ("Starts", "Moves")
+    ]
+)
+
+cpd_keypresent_starts = TabularCPD(
+    variable="Starts",
+    variable_card=2,
+    values=[
+        [0.99, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01],
+        [0.01, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99]
+    ],
+    evidence=["Gas", "Ignition", "KeyPresent"],
+    evidence_card=[2, 2, 2],
+    state_names={
+        "Starts": ['yes', 'no'],
+        "Gas": ['Full', 'Empty'],
+        "Ignition": ["Works", "Doesn't work"],
+        "KeyPresent": ['yes', 'no']
+    },
+)
+
+car_model_with_Key.add_cpds(cpd_starts, cpd_ignition, cpd_gas, cpd_radio, cpd_battery, cpd_moves, cpd_keypresent_starts)
+print(cpd_keypresent_starts)
