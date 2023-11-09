@@ -4,10 +4,12 @@ import random
 import argparse
 import codecs
 import os
+import warnings
+
 import numpy
 import pandas as pd
 
-
+warnings.filterwarnings("ignore")
 # observations
 class Observation:
     def __init__(self, stateseq, outputseq):
@@ -81,7 +83,7 @@ class HMM:
     def forward(self, observation):
         with (open(f"{observation}", 'r') as obs_file):
             for line in obs_file:
-                if line.endswith(".\n"):
+                if len(line) > 1 and line.endswith("\n"):
                     obs = line.split()
                     obs.insert(0, '#')
                     t = len(obs)
@@ -112,12 +114,12 @@ class HMM:
         """
         with (open(f"{observation}", 'r') as obs_file):
             for line in obs_file:
-                if line.endswith(".\n"):
+                if len(line) > 1 and line.endswith("\n"):
                     obs = line.split()
                     obs.insert(0, '#')
                     t = len(obs)
                     arr = pd.DataFrame(0.0, index=list(self.transitions.keys()), columns=obs)
-                    backpointers_tab = pd.DataFrame(index=list(self.transitions.keys()), columns=obs)
+                    backpointer_tab = pd.DataFrame(index=list(self.transitions.keys()), columns=obs)
                     arr.loc['#'][0] = 1.
 
                     for i in range(1, t):
@@ -129,16 +131,19 @@ class HMM:
                                     val = arr.loc[s2][i-1] * self.transitions[s2][s] * self.emissions[s][obs[i]]
                                     if total_sum < val:
                                         total_sum = val
-                                        index = s
+                                        index = s2
                                 arr.loc[s][obs[i]] = total_sum
-                                backpointers_tab.loc[s][obs[i]] = index
+                                backpointer_tab.loc[s][obs[i]] = index
 
-                    print(arr)
-                    print(backpointers_tab)
+                    best_path = [arr.iloc[:, -1].idxmax()]
+                    for i in range(t - 1, 1, -1):
+                        best_path.insert(0, backpointer_tab.iloc[arr.index.get_loc(best_path[0]), i])
+
+                    print(best_path)
 
 
 hmm1 = HMM()
 hmm1.load("partofspeech.browntags.trained")
 hmm1.generate(20)
-#hmm1.forward("ambiguous_sents.obs")
+hmm1.forward("ambiguous_sents.obs")
 hmm1.viterbi("ambiguous_sents.obs")
