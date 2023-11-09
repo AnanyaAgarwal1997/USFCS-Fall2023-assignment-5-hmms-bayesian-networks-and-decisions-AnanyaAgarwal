@@ -5,6 +5,8 @@ import argparse
 import codecs
 import os
 import numpy
+import pandas as pd
+
 
 # observations
 class Observation:
@@ -35,16 +37,72 @@ class HMM:
         """reads HMM structure from transition (basename.trans),
         and emission (basename.emit) files,
         as well as the probabilities."""
+        with open(f"{basename}.trans", 'r') as trans_file:
+            for line in trans_file:
+                from_state, to_state, prob = line.split()
+                if from_state not in self.transitions:
+                    self.transitions[from_state] = {}
+                self.transitions[from_state][to_state] = float(prob)
+
+        with open(f"{basename}.emit", 'r') as emit_file:
+            for line in emit_file:
+                state, symbol, prob = line.split()
+                if state not in self.emissions:
+                    self.emissions[state] = {}
+                self.emissions[state][symbol] = float(prob)
 
 
 
    ## you do this.
     def generate(self, n):
         """return an n-length observation by randomly sampling from this HMM."""
+        observations = []
+        states = []
+        current_state = '#'
+        for i in range(n):
+            next_state = random.choices(
+                list(self.transitions[current_state].keys()),
+                weights=self.transitions[current_state].values()
+            )[0]
+
+            symbol = random.choices(
+                list(self.emissions[next_state].keys()),
+                weights=self.emissions[next_state].values()
+            )[0]
+
+            observations.append(symbol)
+            current_state = next_state
+            states.append(current_state)
+
+        print(observations)
+        return observations
 
 
+    def forward(self, observation):
+        with (open(f"{observation}", 'r') as obs_file):
+            for line in obs_file:
+                if line.endswith(".\n"):
+                    obs = line.split()
+                    obs.insert(0, '#')
+                    t = len(obs)
+                    arr = pd.DataFrame(0.0, index=list(self.transitions.keys()), columns=obs)
+                    arr.loc['#'][0] = 1.
 
-    ## you do this: Implement the Viterbi alborithm. Given an Observation (a list of outputs or emissions)
+                    # Then we propagate forward.
+                    # For every subsequent timestep, for each state, we multiply the probability of reaching that state from
+                    # any prior state by the probability of seeing this observation given that state.
+                    for i in range(1, t):
+                        for s in self.transitions:
+                            total_sum = 0.0
+                            if s != '#' and obs[i] in self.emissions[s]:
+                                for s2 in self.transitions:
+                                    total_sum += arr.loc[s2][i-1] * self.transitions[s2][s] * self.emissions[s][obs[i]]
+                                arr.loc[s][obs[i]] = total_sum
+
+                    print(arr)
+
+
+## you do this: Implement the Viterbi alborithm. Given an Observation (a list of outputs or emissions)
     ## determine the most likely sequence of states.
 
     def viterbi(self, observation):
@@ -52,8 +110,35 @@ class HMM:
         find and return the state sequence that generated
         the output sequence, using the Viterbi algorithm.
         """
+        with (open(f"{observation}", 'r') as obs_file):
+            for line in obs_file:
+                if line.endswith(".\n"):
+                    obs = line.split()
+                    obs.insert(0, '#')
+                    t = len(obs)
+                    arr = pd.DataFrame(0.0, index=list(self.transitions.keys()), columns=obs)
+                    backpointers_tab = pd.DataFrame(index=list(self.transitions.keys()), columns=obs)
+                    arr.loc['#'][0] = 1.
+
+                    for i in range(1, t):
+                        for s in self.transitions:
+                            total_sum = 0.0
+                            index = ''
+                            if s != '#' and obs[i] in self.emissions[s]:
+                                for s2 in self.transitions:
+                                    val = arr.loc[s2][i-1] * self.transitions[s2][s] * self.emissions[s][obs[i]]
+                                    if total_sum < val:
+                                        total_sum = val
+                                        index = s
+                                arr.loc[s][obs[i]] = total_sum
+                                backpointers_tab.loc[s][obs[i]] = index
+
+                    print(arr)
+                    print(backpointers_tab)
 
 
-
-
-
+hmm1 = HMM()
+hmm1.load("partofspeech.browntags.trained")
+hmm1.generate(20)
+#hmm1.forward("ambiguous_sents.obs")
+hmm1.viterbi("ambiguous_sents.obs")
